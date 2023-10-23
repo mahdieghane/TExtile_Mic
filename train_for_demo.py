@@ -27,7 +27,7 @@ participants = ["1","2","3","4","5","6","7","8","9","10"]
 # items = ["table", "drawer", 'cuttingboard'] ### what items are the model trained for?
 items = ["ex32"] ### what items are the model trained for?
 ### mapping from items to their corresponding activities
-item_to_activities = {"ex32":[ "Coughing",  "Speaking"] } 
+item_to_activities = {"ex32":[ "Writing",  "Clapping" , "Grating",   "Drinking", "Chewing","Coughing","Snoring"] } 
 
 def printOverallAccuracy(cm):
     acc = []

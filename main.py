@@ -95,7 +95,7 @@ def collect_data(devices, streaming_servers):
                     print(f"Elapsed time for recording {i + 1}: {time.time() - start_time}")
                     if time.time() - start_time > 6:
                         is_recording = False
-        for i, (device) in enumerate(zip(devices)):
+        #for i, (device) in enumerate(zip(devices)):
 
             if len(record_data[i]) > 0 and not is_recording:
                 try:
@@ -130,6 +130,11 @@ def demo(devices, streaming_servers):
 
         # Define common data lists and background FFT profiles
         windows = [[] for _ in range(5)]
+        #windows = []
+        #windows1 = []
+        #windows2 = []
+        #windows3 = []
+        #windows4 = []
         
         
         background_fft_profiles = [device.calculate_background_fft_profile() for device in devices]
@@ -145,32 +150,22 @@ def demo(devices, streaming_servers):
 
             for i, streaming_server in enumerate(streaming_servers):
                 streaming_server.streaming_signal_in_FFT(data_list[i], background_fft_profiles[i])
+                print("length data", len(data_list[i]))
+                if len(data_list[i])>0:
+                    windows[i].append(data_list[i])
+                    print("Receiving2")
+                    print("length windows:",len(windows[i]))
+                if len(windows[i])>PREDICTION_WINDOW_SIZE:
+                    windows[i].pop(0)
+                    print("Receiving3")
+                print("length windows:",len(windows[i]))
 
-            print("Receiving1")
-            data_lengths = [len(data) for data in data_list]
-            print("length data", data_lengths)
-
-            if all(data and len(data) > 0 for data in data_list):
-                windows = [w + d for w, d in zip(windows, data_list)]
-                print("Receiving2")
-
-            window_lengths = [len(win) for win in windows]
-            print("length windows:", window_lengths)
-
-            if window_lengths[0] > PREDICTION_WINDOW_SIZE:
-                windows = [w[1:] for w in windows]
-                print("Receiving3")
-                print("length windows:", window_lengths)
 
             if all(len(win) >= PREDICTION_WINDOW_SIZE for win in windows):
-                record_sigs = [element for sublist in windows for element in sublist]
+                #record_sigs = [element for sublist in windows for element in sublist]
                 print("Receiving4")
-
-                fft_windows_list = [DSPUtils.segment_along_windows(win, background_fft_profile, Device.BUFFER_SIZE, Device.SHIFT_SIZE) for win, background_fft_profile in zip(windows, background_fft_profiles)]
-        
-                features_list = [DSPUtils.extract_feature(fft_win) for fft_win in fft_windows_list]
-
-                predictions = [loaded_model.predict(features.reshape(1, -1)) for features in features_list]
+                fft_windows,fft_windows1,fft_windows2,fft_windows3,fft_windows4= DSPUtils.segment_along_windows(windows,windows[1],windows[2],windows[3],windows[4], Device.BUFFER_SIZE, Device.SHIFT_SIZE)
+                predictions = loaded_model.predict((DSPUtils.extract_feature(fft_windows,fft_windows1,fft_windows2,fft_windows3,fft_windows4)).reshape(1,-1 ))
 
                 poll.append(predictions[0])
                 print(predictions[0])
@@ -202,9 +197,13 @@ def main():
     print('start server')
 
     streaming_server = Server('0.0.0.0', 8080)
+
     streaming_server1 = Server1('0.0.0.0', 8081)
+
     streaming_server2 = Server2('0.0.0.0', 8082)
+
     streaming_server3 = Server3('0.0.0.0', 8083)
+
     streaming_server4 = Server4('0.0.0.0', 8084)
 
 
